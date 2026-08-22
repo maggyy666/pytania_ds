@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Egzamin magisterski — Data Science</title>
+  <link rel="stylesheet" href="styl.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="naglowek">
+    <h1>Egzamin magisterski</h1>
+    <p class="podtytul">Informatyka — Analityka danych / Data Science</p>
+  </header>
+
+  <div class="pasek-zakladek">
+    <nav class="zakladki" role="tablist">
+      <button type="button" class="zakladka zakladka-aktywna" id="zakladka-test"
+              role="tab" aria-selected="true" aria-controls="widok-test">Test</button>
+      <button type="button" class="zakladka" id="zakladka-nauka"
+              role="tab" aria-selected="false" aria-controls="widok-nauka">Nauka</button>
+    </nav>
+    <label class="przelacznik" id="opcja-losowo">
+      <input type="checkbox" id="losowo">
+      <span>Losowa kolejność</span>
+    </label>
+  </div>
+
+  <!-- ======================= WIDOK: TEST ======================= -->
+  <div id="widok-test" role="tabpanel" aria-labelledby="zakladka-test">
+
+    <section class="statystyki">
+      <div class="stat stat-dobrze">
+        <span class="stat-liczba" id="stat-dobrze">0</span>
+        <span class="stat-etykieta">dobrze</span>
+      </div>
+      <div class="stat stat-zle">
+        <span class="stat-liczba" id="stat-zle">0</span>
+        <span class="stat-etykieta">źle</span>
+      </div>
+      <div class="stat stat-postep">
+        <span class="stat-liczba" id="stat-postep">1 / 50</span>
+        <span class="stat-etykieta">pytanie</span>
+      </div>
+    </section>
+
+    <div class="pasek" aria-hidden="true">
+      <div class="pasek-wypelnienie" id="pasek"></div>
+    </div>
+
+    <main class="karta" id="karta">
+      <div class="numer" id="numer">Pytanie 1</div>
+
+      <h2 class="pytanie" id="pytanie"></h2>
+
+      <div class="odpowiedz-box" id="odpowiedz-box" hidden>
+        <div class="odpowiedz-naglowek">Odpowiedź</div>
+        <div class="odpowiedz" id="odpowiedz"></div>
+      </div>
+
+      <div class="akcje">
+        <button type="button" class="btn btn-pokaz" id="btn-pokaz">
+          Pokaż odpowiedź
+        </button>
+
+        <div class="ocena">
+          <button type="button" class="btn btn-dobrze" id="btn-dobrze">
+            <span class="ikona">✓</span> Dobrze
+          </button>
+          <button type="button" class="btn btn-zle" id="btn-zle">
+            <span class="ikona">✗</span> Źle
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <main class="karta karta-koniec" id="podsumowanie" hidden>
+      <div class="koniec-nadtytul">Koniec zestawu</div>
+      <div class="wynik" id="wynik">0 / 50</div>
+      <div class="procent" id="procent">0%</div>
+      <p class="rozbicie" id="rozbicie"></p>
+      <button type="button" class="btn" id="btn-reset">Zacznij od nowa</button>
+    </main>
+
+    <footer class="stopka">
+      <span class="skrot"><kbd>Spacja</kbd> pokaż</span>
+      <span class="skrot"><kbd>1</kbd> <kbd>D</kbd> dobrze</span>
+      <span class="skrot"><kbd>2</kbd> <kbd>Z</kbd> źle</span>
+      <span class="skrot"><kbd>R</kbd> od nowa</span>
+    </footer>
+
+  </div>
+
+  <!-- ======================= WIDOK: NAUKA ======================= -->
+  <div id="widok-nauka" role="tabpanel" aria-labelledby="zakladka-nauka" hidden>
+    <div class="nauka-pasek">
+      <span class="nauka-licznik" id="nauka-licznik"></span>
+      <button type="button" class="btn-tekstowy" id="btn-rozwin">Rozwiń wszystkie</button>
+    </div>
+    <div class="lista" id="lista"></div>
+  </div>
+
+</div>
+
+<script src="dane.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

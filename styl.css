@@ -1,0 +1,696 @@
+/* ==========================================================================
+   Egzamin magisterski - fiszki.
+
+   Szata: cieply papier + atrament, plasko, bez gradientow i mocnych cieni.
+   Motyw jasny i ciemny przelaczaja sie wg ustawien systemu.
+
+   Skalowanie: rozmiary pisma, odstepy i glebokosc schodkow sa plynne -
+   opisane przez clamp(min, wartosc-zalezna-od-vw, max). Dzieki temu uklad
+   rosnie razem z oknem, zamiast przeskakiwac na kilku progach.
+   ========================================================================== */
+
+:root {
+  --tlo:                #f2efe9;
+  --karta:              #fbfaf7;
+  --obwodka:            #ddd7cc;
+  --obwodka-slaba:      #e7e2d9;
+
+  --tekst:              #201e1b;
+  --tekst-slaby:        #6a635b;
+  --tekst-ledwo:        #989187;
+
+  --btn-tlo:            #2a2724;
+  --btn-tlo-hover:      #14120f;
+  --btn-tekst:          #faf8f4;
+
+  --dobrze:             #3d6b4e;
+  --dobrze-mocny:       #315a40;
+  --dobrze-tlo:         #e7eee7;
+
+  --zle:                #9b4838;
+  --zle-mocny:          #833a2c;
+  --zle-tlo:            #f4e8e4;
+
+  --pasek:              #4c463f;
+  --kod-tlo:            #ebe6dc;
+
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino,
+           "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+
+  /* Glebokosc jednego stopnia schodka. Numer stoi na poziomie 0,
+     pytanie na 1, odpowiedz na 2. */
+  --krok: clamp(14px, 2.3vw, 46px);
+
+  /* Wewnetrzne marginesy kart. */
+  --karta-pad-x: clamp(22px, 2.8vw, 60px);
+  --karta-pad-y: clamp(26px, 2.6vw, 52px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tlo:              #16150f;
+    --karta:            #1f1e1a;
+    --obwodka:          #35322c;
+    --obwodka-slaba:    #2b2924;
+
+    --tekst:            #ece7dd;
+    --tekst-slaby:      #9c9488;
+    --tekst-ledwo:      #6e675d;
+
+    --btn-tlo:          #e7e1d5;
+    --btn-tlo-hover:    #fffbf2;
+    --btn-tekst:        #1a1915;
+
+    --dobrze:           #85b294;
+    --dobrze-mocny:     #9cc4a9;
+    --dobrze-tlo:       #1e2a22;
+
+    --zle:              #d38b7b;
+    --zle-mocny:        #e2a08f;
+    --zle-tlo:          #2d1e1a;
+
+    --pasek:            #b5ac9e;
+    --kod-tlo:          #2a2822;
+  }
+}
+
+* { box-sizing: border-box; }
+
+/* Elementy z display: flex/grid ignoruja atrybut hidden - stad ta regula. */
+[hidden] { display: none !important; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--tlo);
+  color: var(--tekst);
+  font-family: var(--sans);
+  font-size: clamp(16px, 0.88rem + 0.3vw, 21px);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.app {
+  width: min(1360px, 94vw);
+  margin: 0 auto;
+  padding: clamp(28px, 3vw, 60px) 0 clamp(44px, 5vw, 96px);
+}
+
+/* ---------- naglowek ---------- */
+
+.naglowek { margin-bottom: clamp(18px, 1.8vw, 34px); }
+
+.naglowek h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(26px, 1.3rem + 1.3vw, 46px);
+  font-weight: 400;
+  letter-spacing: -.018em;
+  line-height: 1.15;
+}
+
+.podtytul {
+  margin: 6px 0 0;
+  font-size: clamp(14px, 0.8rem + 0.25vw, 19px);
+  color: var(--tekst-slaby);
+}
+
+/* ---------- zakladki ---------- */
+
+.pasek-zakladek {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px clamp(16px, 2vw, 36px);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--obwodka);
+  margin-bottom: clamp(20px, 2vw, 36px);
+}
+
+.zakladki {
+  display: flex;
+  gap: 4px;
+}
+
+.zakladka {
+  appearance: none;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 10px clamp(12px, 1.2vw, 22px) 12px;
+  font-family: var(--sans);
+  font-size: clamp(15px, 0.85rem + 0.3vw, 21px);
+  font-weight: 500;
+  color: var(--tekst-ledwo);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+
+.zakladka:hover { color: var(--tekst-slaby); }
+
+.zakladka-aktywna,
+.zakladka-aktywna:hover {
+  color: var(--tekst);
+  border-bottom-color: var(--tekst);
+}
+
+.zakladka:focus-visible {
+  outline: 2px solid var(--tekst);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.przelacznik {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 4px;
+  font-size: clamp(14px, 0.8rem + 0.25vw, 19px);
+  color: var(--tekst-slaby);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: color .15s;
+}
+
+.przelacznik:hover { color: var(--tekst); }
+
+.przelacznik input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--btn-tlo);
+  cursor: pointer;
+}
+
+/* ---------- statystyki ---------- */
+
+.statystyki {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--obwodka-slaba);
+  border: 1px solid var(--obwodka-slaba);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: clamp(16px, 1.4vw, 26px) 12px clamp(14px, 1.2vw, 22px);
+  background: var(--karta);
+}
+
+.stat-liczba {
+  font-family: var(--serif);
+  font-size: clamp(30px, 1.4rem + 1.1vw, 48px);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.stat-etykieta {
+  font-size: clamp(11px, 0.62rem + 0.15vw, 14px);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+}
+
+.stat-dobrze .stat-liczba { color: var(--dobrze); }
+.stat-zle    .stat-liczba { color: var(--zle); }
+
+.stat-postep .stat-liczba {
+  color: var(--tekst-slaby);
+  font-size: clamp(24px, 1.1rem + 0.9vw, 38px);
+  padding-top: 6px;
+}
+
+/* ---------- pasek postepu ---------- */
+
+.pasek {
+  height: 4px;
+  background: var(--obwodka);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: clamp(22px, 2.2vw, 40px);
+}
+
+.pasek-wypelnienie {
+  height: 100%;
+  width: 0;
+  background: var(--pasek);
+  transition: width .35s ease;
+}
+
+/* ==========================================================================
+   Karta z pytaniem (zakladka Test)
+
+   Uklad schodkowy, taki sam jak w Nauce:
+     poziom 0 - etykieta "Pytanie N"
+     poziom 1 - tresc pytania
+     poziom 2 - odpowiedz, podparta pionowa kreska
+   Przyciski wracaja na poziom 0, bo pelnia role stopki karty.
+   ========================================================================== */
+
+.karta {
+  background: var(--karta);
+  border: 1px solid var(--obwodka);
+  border-radius: 10px;
+  padding: var(--karta-pad-y) var(--karta-pad-x);
+}
+
+.numer {
+  font-size: clamp(11px, 0.62rem + 0.18vw, 15px);
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+  margin-bottom: clamp(12px, 1.1vw, 22px);
+}
+
+.pytanie {
+  margin: 0 0 0 var(--krok);
+  font-family: var(--serif);
+  font-size: clamp(23px, 1.1rem + 1.5vw, 46px);
+  font-weight: 400;
+  line-height: 1.28;
+  letter-spacing: -.014em;
+  text-wrap: pretty;
+}
+
+.odpowiedz-box {
+  margin-top: clamp(26px, 2.4vw, 46px);
+  margin-left: calc(var(--krok) * 2);
+  padding-left: clamp(16px, 1.5vw, 30px);
+  border-left: 2px solid var(--obwodka);
+  animation: wjazd .22s ease both;
+}
+
+@keyframes wjazd {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .odpowiedz-box { animation: none; }
+  .pasek-wypelnienie { transition: none; }
+}
+
+.odpowiedz-naglowek {
+  font-size: clamp(11px, 0.62rem + 0.18vw, 15px);
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+  margin-bottom: 14px;
+}
+
+/* ---------- tresc odpowiedzi (wspolna dla obu zakladek) ---------- */
+
+.odpowiedz {
+  font-size: clamp(17px, 0.95rem + 0.35vw, 23px);
+  line-height: 1.72;
+}
+
+.odpowiedz > :first-child { margin-top: 0; }
+.odpowiedz > :last-child  { margin-bottom: 0; }
+
+.odpowiedz p  { margin: 0 0 1em; }
+.odpowiedz ul,
+.odpowiedz ol { padding-left: 1.4em; margin: 1em 0; }
+.odpowiedz li { margin-bottom: .55em; }
+
+.odpowiedz code {
+  background: var(--kod-tlo);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: .87em;
+  font-family: "Cascadia Code", Consolas, "SF Mono", Menlo, monospace;
+}
+
+.odpowiedz b, .odpowiedz strong { font-weight: 650; }
+
+.brak-odpowiedzi {
+  color: var(--tekst-ledwo);
+  font-style: italic;
+}
+
+.brak-odpowiedzi code { font-style: normal; }
+
+/* ---------- przyciski ---------- */
+
+.akcje {
+  margin-top: clamp(28px, 2.6vw, 50px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: clamp(14px, 1.2vw, 22px) 28px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-family: var(--sans);
+  font-size: clamp(15px, 0.85rem + 0.32vw, 21px);
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--btn-tekst);
+  background: var(--btn-tlo);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+
+.btn:hover { background: var(--btn-tlo-hover); }
+
+.btn:focus-visible {
+  outline: 2px solid var(--tekst);
+  outline-offset: 3px;
+}
+
+/* "Pokaz odpowiedz" jest opcjonalne - ocenic mozna bez odslaniania,
+   wiec przycisk jest lzejszy wizualnie niz para Dobrze / Zle. */
+.btn-pokaz {
+  width: 100%;
+  background: transparent;
+  color: var(--tekst-slaby);
+  border-color: var(--obwodka);
+}
+
+.btn-pokaz:hover {
+  background: transparent;
+  color: var(--tekst);
+  border-color: var(--tekst-slaby);
+}
+
+.ocena {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-dobrze {
+  background: var(--dobrze-tlo);
+  color: var(--dobrze);
+  border-color: var(--dobrze-tlo);
+}
+
+.btn-dobrze:hover {
+  background: var(--dobrze);
+  border-color: var(--dobrze);
+  color: var(--karta);
+}
+
+.btn-dobrze:focus-visible { outline-color: var(--dobrze-mocny); }
+
+.btn-zle {
+  background: var(--zle-tlo);
+  color: var(--zle);
+  border-color: var(--zle-tlo);
+}
+
+.btn-zle:hover {
+  background: var(--zle);
+  border-color: var(--zle);
+  color: var(--karta);
+}
+
+.btn-zle:focus-visible { outline-color: var(--zle-mocny); }
+
+.ikona { font-size: .9em; line-height: 1; }
+
+/* ---------- podsumowanie ---------- */
+
+.karta-koniec {
+  text-align: center;
+  padding: clamp(38px, 3.6vw, 72px) var(--karta-pad-x);
+}
+
+.koniec-nadtytul {
+  font-size: clamp(11px, 0.62rem + 0.18vw, 15px);
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+  margin-bottom: 22px;
+}
+
+.wynik {
+  font-family: var(--serif);
+  font-size: clamp(48px, 2.4rem + 2.6vw, 96px);
+  font-weight: 400;
+  letter-spacing: -.03em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.procent {
+  font-size: clamp(15px, 0.85rem + 0.3vw, 21px);
+  color: var(--tekst-slaby);
+  margin-top: 12px;
+}
+
+.rozbicie {
+  margin: clamp(20px, 2vw, 36px) 0 clamp(26px, 2.4vw, 44px);
+  font-size: clamp(15px, 0.85rem + 0.3vw, 21px);
+  color: var(--tekst-slaby);
+}
+
+.rozbicie b { font-weight: 600; color: var(--tekst); }
+
+.karta-koniec .btn { width: auto; min-width: 260px; margin: 0 auto; }
+
+/* ---------- stopka ze skrotami ---------- */
+
+.stopka {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px clamp(18px, 2vw, 34px);
+  margin-top: clamp(20px, 2vw, 34px);
+  font-size: clamp(12px, 0.7rem + 0.2vw, 16px);
+  color: var(--tekst-ledwo);
+}
+
+.skrot { white-space: nowrap; }
+
+kbd {
+  display: inline-block;
+  min-width: 21px;
+  padding: 2px 7px;
+  margin-right: 2px;
+  background: var(--karta);
+  border: 1px solid var(--obwodka);
+  border-radius: 4px;
+  font-family: var(--sans);
+  font-size: .8em;
+  font-weight: 500;
+  color: var(--tekst-slaby);
+  text-align: center;
+}
+
+/* ==========================================================================
+   Zakladka Nauka - spis zagadnien
+
+   Jedna kolumna, zwezona do szerokosci wygodnej w czytaniu. Kazde
+   zagadnienie to <details>: caly naglowek (numer + pytanie) jest klikalny
+   i rozwija odpowiedz. Odpowiedz jest wcieta do linii tekstu pytania
+   i podparta pionowa kreska - jak w karcie testowej.
+   ========================================================================== */
+
+/* Wymiary wspolne dla naglowka wpisu i wcietej odpowiedzi. */
+.lista {
+  --wpis-pad-x:      clamp(18px, 2vw, 34px);
+  --wpis-numer-szer: clamp(30px, 2.6vw, 44px);
+  --wpis-gap:        clamp(12px, 1.2vw, 20px);
+}
+
+/* Pasek i lista trzymaja te sama szerokosc kolumny. */
+.nauka-pasek,
+.lista {
+  width: min(920px, 100%);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.nauka-pasek {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px 20px;
+  flex-wrap: wrap;
+  margin-bottom: clamp(12px, 1.2vw, 22px);
+}
+
+.nauka-licznik {
+  font-size: clamp(12px, 0.7rem + 0.2vw, 16px);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+}
+
+.btn-tekstowy {
+  appearance: none;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  font-family: var(--sans);
+  font-size: clamp(13px, 0.75rem + 0.22vw, 17px);
+  font-weight: 500;
+  color: var(--tekst-slaby);
+  border-bottom: 1px solid var(--obwodka);
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+
+.btn-tekstowy:hover { color: var(--tekst); border-bottom-color: var(--tekst); }
+
+.btn-tekstowy:focus-visible {
+  outline: 2px solid var(--tekst);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1vw, 16px);
+}
+
+.wpis {
+  background: var(--karta);
+  border: 1px solid var(--obwodka);
+  border-radius: 10px;
+  scroll-margin-top: 20px;
+  transition: border-color .15s;
+}
+
+.wpis[open] { border-color: var(--tekst-ledwo); }
+
+/* ---------- klikalny naglowek wpisu ---------- */
+
+.wpis-naglowek {
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  gap: var(--wpis-gap);
+  padding: clamp(15px, 1.4vw, 24px) var(--wpis-pad-x);
+  cursor: pointer;
+  user-select: none;
+}
+
+.wpis-naglowek::-webkit-details-marker { display: none; }
+
+.wpis-numer {
+  flex: none;
+  width: var(--wpis-numer-szer);
+  font-family: var(--serif);
+  font-size: clamp(16px, 0.8rem + 0.45vw, 24px);
+  font-weight: 400;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--tekst-ledwo);
+}
+
+.wpis-pytanie {
+  flex: 1;
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(18px, 0.95rem + 0.5vw, 27px);
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+  text-wrap: pretty;
+}
+
+/* Znacznik +/- po prawej, trzymany przy pierwszej linii pytania. */
+.wpis-naglowek::after {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  align-self: flex-start;
+  margin-top: .28em;
+  border: 1px solid var(--obwodka);
+  border-radius: 5px;
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--tekst-slaby);
+  transition: border-color .15s, color .15s;
+}
+
+.wpis[open] > .wpis-naglowek::after { content: "−"; }
+
+.wpis-naglowek:hover::after {
+  border-color: var(--tekst-slaby);
+  color: var(--tekst);
+}
+
+.wpis-naglowek:focus-visible {
+  outline: 2px solid var(--tekst);
+  outline-offset: -2px;
+  border-radius: 10px;
+}
+
+/* Plakietka przy pytaniach bez opracowanej odpowiedzi. */
+.wpis-brak {
+  flex: none;
+  font-family: var(--sans);
+  font-size: clamp(10px, 0.6rem + 0.15vw, 13px);
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tekst-ledwo);
+  white-space: nowrap;
+}
+
+/* ---------- rozwinieta odpowiedz ---------- */
+
+.wpis-odpowiedz {
+  margin: 0 var(--wpis-pad-x) clamp(18px, 1.7vw, 30px)
+          calc(var(--wpis-pad-x) + var(--wpis-numer-szer) + var(--wpis-gap));
+  padding-left: clamp(14px, 1.2vw, 24px);
+  border-left: 2px solid var(--obwodka);
+  font-size: clamp(15.5px, 0.85rem + 0.3vw, 20px);
+  line-height: 1.7;
+}
+
+/* ==========================================================================
+   Waskie ekrany - tylko to, czego clamp() sam nie zalatwi (zmiany ukladu).
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .app { width: min(100%, 100vw); padding-left: 15px; padding-right: 15px; }
+
+  /* Przy tej szerokosci schodki zjadaja za duzo miejsca na tekst -
+     zostaje plytkie wciecie samej odpowiedzi. */
+  :root { --krok: 0px; }
+
+  .odpowiedz-box { padding-left: 14px; }
+
+  /* Odpowiedz nie miesci sie juz pod kolumna pytania - wraca do
+     lewego marginesu karty. */
+  .wpis-odpowiedz {
+    margin-left: var(--wpis-pad-x);
+    padding-left: 14px;
+  }
+
+  .ocena { grid-template-columns: 1fr; gap: 10px; }
+  .karta-koniec .btn { width: 100%; min-width: 0; }
+}
